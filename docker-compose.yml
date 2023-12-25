@@ -1,0 +1,102 @@
+version: '3.9'
+
+volumes:
+  dbdata:
+
+services:
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: supersecurepassword
+    container_name: db
+    volumes:
+      - dbdata:/var/lib/mysql
+
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: pma
+    links:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    restart: always
+    ports:
+      - 8081:80
+
+  backend:
+    depends_on:
+      - db
+    build:
+      context: server/.
+
+    ports:
+      - 3000:3000
+
+
+
+
+
+  # backend:
+  #   depends_on:
+  #     migrator:
+  #       condition: service_completed_successfully
+  #   image: flavius
+  #   volumes:
+  #     - ./media_root:/app/media_root
+  #     # for file hot reloading:
+  #     - ./backend/flavius:/app/flavius
+  #     - ./backend/honorius:/app/honorius
+  #     - ./backend/tests:/app/tests
+  #   build:
+  #     context: .
+  #     dockerfile: ./Dockerfile
+  #     no_cache: true
+  #   command: "bash -c 'pip install debugpy && python -m debugpy --listen 0.0.0.0:5678 manage.py runserver 0.0.0.0:5000'"
+  #   ports:
+  #     - 5678:5678
+  #   hostname: "flavius"
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.backend.rule=PathPrefix(`/api`) || PathPrefix(`/static`) || Path(`/login`) || Path(`/redirectafterlogin`) || Path(`/logout`)"
+  #     - "traefik.http.services.backend.loadbalancer.server.port=5000"
+  #   restart: unless-stopped
+  #   env_file: .env
+  #   environment:
+  #     FLAVIUS_DB_HOSTNAME: database
+  #     FLAVIUS_RQ_DB_HOSTNAME: redis
+  #     FLAVIUS_MEDIA_ROOT: /app/media_root
+  #     DEBUG: true
+
+  # frontend:
+  #   depends_on:
+  #     - flavius
+  #   image: node
+  #   command: 'bash -c "npm ci && npm run dev-bind-all"' 
+  #   volumes:
+  #     - ./frontend/flavius:/app
+  #     - ./media_root:/app/media_root
+  #   working_dir: /app
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.frontend.rule=PathPrefix(`/`) && !PathPrefix(`/static`) && !PathPrefix(`/api`) && !Path(`/login`) && !Path(`/redirectafterlogin`)"
+  #     - "traefik.http.services.frontend.loadbalancer.server.port=5173"
+  #   restart: unless-stopped
+  #   env_file: .env
+
+  # adminer:
+  #   depends_on:
+  #     - database
+  #   image: michalhosna/adminer
+  #   ports:
+  #     - 8080:8080
+  #   environment:
+  #     ADMINER_DB: $FLAVIUS_DB_NAME
+  #     ADMINER_DRIVER: pgsql
+  #     ADMINER_USERNAME: $FLAVIUS_DB_USER
+  #     ADMINER_PASSWORD: $FLAVIUS_DB_PASSWORD
+  #     ADMINER_SERVER: database
+  #     ADMINER_AUTOLOGIN: 1
+

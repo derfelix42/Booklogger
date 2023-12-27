@@ -18,6 +18,10 @@ Features
 - Also add papers
 - Add eBook Storage
 - Online-Reader for PDFs
+- Categories like Genre etc
+- Collections "Wishlist", "Favorites", ...
+- Book-Property: Owner (either 'local' list of people or other Users of Booklogger)
+
 
 Todo Steps
 

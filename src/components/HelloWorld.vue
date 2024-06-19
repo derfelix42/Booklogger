@@ -15,9 +15,11 @@ const count = ref(0)
 
   <section>
     <div>
-      <button>
-        lets get started... >
-      </button>
+      <RouterLink  to="/books">
+        <button>
+          lets get started... >
+        </button>
+      </RouterLink >
     </div>
 
   </section>
